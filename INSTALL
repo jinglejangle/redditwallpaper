@@ -1,0 +1,16 @@
+redditWallpaper.php - 
+sets all desktop screens to images it scrapes from reddit 
+
+Just run it using php: eg: 
+
+        php redditWallpaper.php
+
+to put in cron eg for every 10 mins: 
+
+        */10 * * * * env DISPLAY=:0.0 /usr/bin/php /opt/redditwallpaper/redditWallpaper.php
+
+to configure the subreddits: 
+edit the file, you'll find an array with a list of subreddits at the top, change them. 
+it scrapes the first page of a random subreddit in the list, and finds any imgur links, 
+it then randomly selects one of those, and downloads it, saves it to ~/redditautowallpaper 
+and then sets it as the wallpaper 
