@@ -38,7 +38,7 @@ $redditWallpaper = new redditWallpaper($subreddits);
 
 class redditWallpaper { 
     public $subreddit = 'http://www.reddit.com/r/wallpaper'; 
-    private $images = [];
+        private $images = [];
     private $saveto = '/tmp';
     private $fallback_image = '';
 
@@ -51,7 +51,7 @@ class redditWallpaper {
         if(!empty($saveto)){ 
             $this->saveto = $saveto; 
         }
-	$this->subreddits = $subreddits; 
+        $this->subreddits = $subreddits; 
         $this->selectSubReddit($this->subreddits); 
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
@@ -68,7 +68,7 @@ class redditWallpaper {
         $this->subreddit = 'http://www.reddit.com/r/'.$subreddits[rand(0,count($subreddits)-1)];
         return $this->subreddit; 
     }
-    
+
     function setWallpaper($paper) { 
         $paper = escapeshellcmd($paper);
         $cmd = str_replace("::FILE::", $paper, SET_BG_COMMAND ); 
@@ -79,30 +79,32 @@ class redditWallpaper {
     function extractImages($html){ 
         preg_match_all("/http:\/\/imgur.com\/.[^\"]+/mi", $html, $full);       
         $_images = array_keys(array_flip($full[0]));  
-	$images = array();		
+        $images = array();		
         foreach($_images as $i=>$img){ 
-                if(!preg_match_all("/gallery/", $img) && !preg_match_all("/new$/", $img)){ 
-                        $images[$i] = str_replace("http://imgur.com", "http://i.imgur.com", $img).".jpg"; 
-                }
+            if(!preg_match_all("/gallery/", $img) && !preg_match_all("/new$/", $img)){ 
+                //$images[$i] = str_replace("http://imgur.com", "http://i.imgur.com", $img).".jpg"; 
+                $images[$i] = str_replace("http://imgur.com", "http://imgur.com/download", $img); 
+            }
         }
+        //print_r($images);
         return $images;
 
     }
 
     function getImages(){ 
-        
-	$this->images=array();
-        
+
+        $this->images=array();
+
         $html = file_get_contents($this->subreddit); 
         $this->images = $this->extractImages($html); 
         if(empty($this->images)){ 
-                $this->subreddits =  array_diff($this->subreddits, [$this->subreddit]);//remove offending subreddit and try again
-                if(count($this->subreddits)){ 
-                    $this->selectSubReddit($this->subreddits); 
-                    $this->images = $this->getImages(); 
-                }else{
-                        die("Tried all subreddits. something else is badly wrong. ");
-                }
+            $this->subreddits =  array_diff($this->subreddits, [$this->subreddit]);//remove offending subreddit and try again
+            if(count($this->subreddits)){ 
+                $this->selectSubReddit($this->subreddits); 
+                $this->images = $this->getImages(); 
+            }else{
+                die("Tried all subreddits. something else is badly wrong. ");
+            }
         }
         return $this->images; 
 
@@ -111,7 +113,7 @@ class redditWallpaper {
     function fetchWallpaper(){ 
         $this->images = $this->getImages(); 
         if(empty($this->images)){ 
-                die("Can't find any images in $this->subreddit ");
+            die("Can't find any images in $this->subreddit ");
         }
         $image = false;
         $trycount=0; 
@@ -120,8 +122,8 @@ class redditWallpaper {
             $trycount++; 
         }
         if($trycount>18){ 
-                echo "I did a lot of tries, something was wrong with $this->subreddit image: $image. Using fallback image $this->fallback_image\n "; 
-               return $this->fallback_image;  
+            echo "I did a lot of tries, something was wrong with $this->subreddit image: $image. Using fallback image $this->fallback_image\n "; 
+            return $this->fallback_image;  
         }
         return $image; 
     }
@@ -136,17 +138,14 @@ class redditWallpaper {
         }
         shuffle($images);
         foreach($images as $url){ 
-                //echo "checking image $url\n";
             $filename = basename($url); 
 
             if($this->checkAlreadySeen($filename)){ 
                 $this->fallback_image =  AUTO_PICTURE_DIR."/".$filename; 
                 return AUTO_PICTURE_DIR."/".$filename;
-                //break; 
             }
-    
+
             $ch = curl_init ($url);
-            //curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_HEADER, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
@@ -172,12 +171,10 @@ class redditWallpaper {
                 $this->tmpfile = $this->saveto . $type; 
 
                 $body = substr($raw, $header_size);
-
                 curl_close ($ch);
                 if(file_exists($this->tmpfile)){
                     unlink($this->tmpfile);
                 }
-
                 if(@$fp = fopen($this->tmpfile,'x')){ 
                     fwrite($fp, $body);
                     fclose($fp);
@@ -211,7 +208,6 @@ class redditWallpaper {
             define( "SET_BG_COMMAND", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s ::FILE::"); 
             return true; 
         }
-
 
         //unknown / unsupported... try wmsetbg
         define( "SET_BG_COMMAND", "wmsetbg ::FILE::"); 
