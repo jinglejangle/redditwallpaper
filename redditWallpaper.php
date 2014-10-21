@@ -19,7 +19,6 @@ $subreddits = array(
         "ImaginaryBattlefields",
         "ImaginaryCityscapes",
         "ImaginaryWastelands",
-        "IncredibleIndia",
         "InfraredPorn",
         "ITookAPicture",
         "IWishIWasThere",
@@ -28,9 +27,8 @@ $subreddits = array(
         "SkylinePorn",
         "Skyscrapers",
         "SpecArt",
-        "StreetViewExplorers",
-        "Wallpapers",
-        "WorldCities",
+        "Wallpaper",
+        "skyporn",
         "ViewPorn",
         ); 
 
