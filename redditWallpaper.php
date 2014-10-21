@@ -29,8 +29,6 @@ $subreddits = array(
         "Skyscrapers",
         "SpecArt",
         "StreetViewExplorers",
-        "UrbanDesign",
-        "UrbanPlanning",
         "Wallpapers",
         "WorldCities",
         "ViewPorn",
