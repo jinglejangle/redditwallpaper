@@ -51,6 +51,7 @@ class redditWallpaper {
         }
         $this->subreddits = $subreddits; 
         $this->selectSubReddit($this->subreddits); 
+
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
     }
@@ -63,7 +64,9 @@ class redditWallpaper {
 
     function selectSubReddit($subreddits){ 
         shuffle($subreddits);
-        $this->subreddit = 'http://www.reddit.com/r/'.$subreddits[rand(0,count($subreddits)-1)];
+        $extra = array("hot", "new", "" ); 
+        $variant = $extra[rand(0,count($extra)-1)]; 
+        $this->subreddit = 'http://api.reddit.com/r/'.strtolower($subreddits[rand(0,count($subreddits)-1)])."/$variant";
         return $this->subreddit; 
     }
 
@@ -74,38 +77,38 @@ class redditWallpaper {
         exec($cmd);
     }
 
-    function extractImages($html){ 
-        preg_match_all("/http:\/\/imgur.com\/.[^\"]+/mi", $html, $full);       
-        $_images = array_keys(array_flip($full[0]));  
-        $images = array();		
-        foreach($_images as $i=>$img){ 
-            if(!preg_match_all("/gallery/", $img) && !preg_match_all("/new$/", $img)){ 
-                //$images[$i] = str_replace("http://imgur.com", "http://i.imgur.com", $img).".jpg"; 
-                $images[$i] = str_replace("http://imgur.com", "http://imgur.com/download", $img); 
-            }
-        }
-        //print_r($images);
-        return $images;
-
+    function getJson(){ 
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL,$this->subreddit);
+        curl_setopt($ch,CURLOPT_USERAGENT,'https://github.com/jinglejangle/redditwallpaper');
+        $json=curl_exec($ch);
+        curl_close($ch);
+        $obj = json_decode($json);
+        $this->data = $obj; 
+        return $obj;
     }
 
     function getImages(){ 
-
         $this->images=array();
-
-        $html = file_get_contents($this->subreddit); 
-        $this->images = $this->extractImages($html); 
-        if(empty($this->images)){ 
-            $this->subreddits =  array_diff($this->subreddits, [$this->subreddit]);//remove offending subreddit and try again
-            if(count($this->subreddits)){ 
-                $this->selectSubReddit($this->subreddits); 
-                $this->images = $this->getImages(); 
-            }else{
-                die("Tried all subreddits. something else is badly wrong. ");
+        //find imgur...
+        $images = array();
+        $json = $this->getJson(); 
+        
+        foreach($json as $post){ 
+            if(isset($post->children)){ 
+                if(count($post->children)){ 
+                    foreach($post->children as $child){ 
+                        if($child->data->domain == 'i.imgur.com'){ 
+                            $images[] = $child->data->url; 
+                        }
+                    } 
+                }
             }
         }
+        $this->images = $images; 
         return $this->images; 
-
     }
 
     function fetchWallpaper(){ 
@@ -117,6 +120,11 @@ class redditWallpaper {
         $trycount=0; 
         while(!$image && $trycount < 20){  
             $image = $this->fetchImage($this->images) ; 
+            if(!$image){  
+                //if that failed, try another sub... 
+                $this->selectSubReddit($this->subreddits);     
+                $this->images = $this->getImages(); 
+            }
             $trycount++; 
         }
         if($trycount>18){ 
