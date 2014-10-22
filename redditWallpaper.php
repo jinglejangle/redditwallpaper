@@ -10,6 +10,7 @@ class redditWallpaper {
     private $saveto = '/tmp';
     private $fallback_image = '';
     private $subredditsConfigFile = 'subreddits.txt';
+    public $minWidth = 1440; //minimum X resolution
 
     function __construct($subreddits=array(), $saveto=''){ 
 
@@ -156,7 +157,7 @@ class redditWallpaper {
                     $type = 'jpg';  
                 }
                 $this->tmpfile = $this->saveto . $type; 
-
+                
                 $body = substr($raw, $header_size);
                 curl_close ($ch);
                 if(file_exists($this->tmpfile)){
@@ -167,6 +168,15 @@ class redditWallpaper {
                     fclose($fp);
                     $filename = AUTO_PICTURE_DIR."/$filename"; 
                     rename($this->tmpfile, "$filename"); 
+
+                    $image_size = getimagesize($filename); 
+                    $width = $image_size[0];
+                    $height = $image_size[1];
+
+                    //echo "WIDTH:$width HEIGHT:$height"; 
+                    if($width < $this->minWidth){ 
+                                return false; 
+                    }
                     unset($type);
                     if(file_exists($filename)){ 
                         //echo "I chose $filename  at $url \n"; 
