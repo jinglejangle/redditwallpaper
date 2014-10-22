@@ -76,18 +76,22 @@ class redditWallpaper {
         $this->images=array();
         //find imgur...
         $images = array();
+        $json = -1; 
         $json = $this->getJson(); 
-
-        foreach($json as $post){ 
-            if(isset($post->children)){ 
-                if(count($post->children)){ 
-                    foreach($post->children as $child){ 
-                        if($child->data->domain == 'i.imgur.com'){ 
-                            $images[] = $child->data->url; 
-                        }
-                    } 
+        if(is_object($json)){ 
+            foreach($json as $post){ 
+                if(isset($post->children)){ 
+                    if(count($post->children)){ 
+                        foreach($post->children as $child){ 
+                            if($child->data->domain == 'i.imgur.com'){ 
+                                $images[] = $child->data->url; 
+                            }
+                        } 
+                    }
                 }
             }
+        }else{
+                die("Error. could not get json from api"); 
         }
         $this->images = $images; 
         return $this->images; 
