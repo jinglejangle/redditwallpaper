@@ -13,6 +13,7 @@ BridgePorn
 ImaginaryBattlefields
 ImaginaryCityscapes
 ImaginaryWastelands
+ImaginaryStarscapes
 InfraredPorn
 ITookAPicture
 IWishIWasThere
@@ -24,3 +25,6 @@ SpecArt
 Wallpaper
 skyporn
 ViewPorn
+urbanporn
+SilhouettePorn
+weatherporn
