@@ -1,44 +1,15 @@
 <?php
 $home = getenv("HOME");
-
 define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
 
-$subreddits = array(
-        "spaceporn",
-        "waterporn",
-        "earthporn",
-        "wallpapers",
-        "natureporn",
-        "seaporn",
-        "villageporn",
-        "fireporn",
-        "FuturePorn",
-        "cityporn",
-        "skylineporn" ,
-        "BridgePorn",
-        "ImaginaryBattlefields",
-        "ImaginaryCityscapes",
-        "ImaginaryWastelands",
-        "InfraredPorn",
-        "ITookAPicture",
-        "IWishIWasThere",
-        "MattePainting",
-        "RoadPorn",
-        "SkylinePorn",
-        "Skyscrapers",
-        "SpecArt",
-        "Wallpaper",
-        "skyporn",
-        "ViewPorn",
-        ); 
-
-$redditWallpaper = new redditWallpaper($subreddits); 
+$redditWallpaper = new redditWallpaper(); 
 
 class redditWallpaper { 
     public $subreddit = 'http://www.reddit.com/r/wallpaper'; 
-        private $images = [];
+    private $images = [];
     private $saveto = '/tmp';
     private $fallback_image = '';
+    private $subredditsConfigFile = 'subreddits.txt';
 
     function __construct($subreddits=array(), $saveto=''){ 
 
@@ -49,11 +20,21 @@ class redditWallpaper {
         if(!empty($saveto)){ 
             $this->saveto = $saveto; 
         }
-        $this->subreddits = $subreddits; 
+        if(!empty($subreddits)){ 
+                $this->subreddits = $subreddits; 
+        }else{
+                $this->loadSubRedditsConfig();
+        }
         $this->selectSubReddit($this->subreddits); 
 
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
+    }
+
+    private function loadSubRedditsConfig(){ 
+        $f = trim(file_get_contents(dirname(__FILE__)."/".$this->subredditsConfigFile)); 
+        $subreddits = explode("\n", $f); 
+        $this->subreddits = $subreddits; 
     }
 
     private function setupFolder(){ 
@@ -95,7 +76,7 @@ class redditWallpaper {
         //find imgur...
         $images = array();
         $json = $this->getJson(); 
-        
+
         foreach($json as $post){ 
             if(isset($post->children)){ 
                 if(count($post->children)){ 
