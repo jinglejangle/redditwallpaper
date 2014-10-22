@@ -10,7 +10,12 @@ to put in cron eg for every 10 mins:
         */10 * * * * env DISPLAY=:0.0 /usr/bin/php /opt/redditwallpaper/redditWallpaper.php
 
 to configure the subreddits: 
-edit the file, you'll find an array with a list of subreddits at the top, change them. 
-it scrapes the first page of a random subreddit in the list, and finds any imgur links, 
-it then randomly selects one of those, and downloads it, saves it to ~/redditautowallpaper 
-and then sets it as the wallpaper 
+edit the subreddits.txt file, 
+you'll find list of subreddits, one per line. 
+it loads the json from the reddit api for the first page of a random subreddit in the list, and randomly selects from 
+/new /top  and default /, it then finds any imgur links, it then randomly selects one of those, and downloads it, saves 
+it to ~/redditautowallpaper and then sets it as the wallpaper 
+
+If you use Mavericks or linux with XFCE4 it will work out the box. 
+If you use some other linux, if you install wmsetbg it will start working. 
+Should be easy enough to add other wm set commands though. 
