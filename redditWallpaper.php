@@ -11,16 +11,14 @@ class redditWallpaper {
     private $fallback_image = '';
     private $subredditsConfigFile = 'subreddits.txt';
     public $minWidth = 1440; //minimum X resolution
+    public $maxSizeLimit = 190792;  //about 190MB max
 
-    function __construct($subreddits=array(), $saveto=''){ 
+    function __construct($subreddits=array() ){ 
 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
         $this->setupFolder(); 
         $this->decideSetMethod(); 
-
-        if(!empty($saveto)){ 
-            $this->saveto = $saveto; 
-        }
+        $this->checkDownloadFolderSize();
         if(!empty($subreddits)){ 
                 $this->subreddits = $subreddits; 
         }else{
@@ -216,6 +214,21 @@ class redditWallpaper {
 
     }
 
+    function checkDownloadFolderSize(){ 
+        $this->imgDir = AUTO_PICTURE_DIR; 
+        $ksize = `du -ksc $this->imgDir`;
+        if($ksize >= $this->maxSizeLimit){ 
+            $this->tidyDownloadFolder();
+        }
+    }
+
+    function tidyDownloadFolder(){ 
+        $cmd = "ls -t $this->imgDir/"; 
+        $files = explode(PHP_EOL, trim(`$cmd`)); 
+        for($x=count($files)-1;$x>5; $x--){ 
+            unlink($this->imgDir."/".$files[$x]); 
+        }
+    }
 }
 
 
