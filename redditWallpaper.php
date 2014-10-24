@@ -73,7 +73,7 @@ class redditWallpaper {
     }
 
     function setWallpaper($paper) { 
-        echo "SETTING $paper\n";
+        //echo "SETTING $paper\n";
         $paper = escapeshellcmd($paper);
         $cmd = str_replace("::FILE::", $paper, SET_BG_COMMAND ); 
         exec($cmd);
