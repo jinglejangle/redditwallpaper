@@ -1,6 +1,8 @@
 redditWallpaper.php - 
 sets all desktop screens to images it scrapes from reddit 
 
+if you want the full list of subreddits, copy subreddits.txt.dist to subreddits.txt 
+
 Just run it using php: eg: 
 
         php redditWallpaper.php
@@ -8,6 +10,7 @@ Just run it using php: eg:
 to put in cron eg for every 10 mins: 
 
         */10 * * * * env DISPLAY=:0.0 /usr/bin/php /opt/redditwallpaper/redditWallpaper.php
+
 
 to configure the subreddits: 
 edit the subreddits.txt file, 
@@ -19,3 +22,7 @@ it to ~/redditautowallpaper and then sets it as the wallpaper
 If you use Mavericks or linux with XFCE4 it will work out the box. 
 If you use some other linux, if you install wmsetbg it will start working. 
 Should be easy enough to add other wm set commands though. 
+
+
+example list of subreddits for subreddits.txt: 
+
