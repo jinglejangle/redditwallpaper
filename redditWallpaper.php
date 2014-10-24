@@ -10,11 +10,11 @@ class redditWallpaper {
     private $saveto = '/tmp';
     private $fallback_image = '';
     private $subredditsConfigFile = 'subreddits.txt';
+    private $_sub = null; 
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
 
     function __construct($subreddits=array() ){ 
-
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
         $this->setupFolder(); 
         $this->decideSetMethod(); 
@@ -46,14 +46,18 @@ class redditWallpaper {
         shuffle($subreddits);
         $extra = array("hot", "new", "" ); 
         $variant = $extra[rand(0,count($extra)-1)]; 
-        $this->subreddit = 'http://api.reddit.com/r/'.strtolower($subreddits[rand(0,count($subreddits)-1)])."/$variant";
+        $this->_sub = strtolower($subreddits[rand(0,count($subreddits)-1)])."/$variant";
+        $this->subreddit = 'http://api.reddit.com/r/'.$this->_sub; 
+        if(preg_match("/^user\//", $this->_sub)){ 
+            //this is a users subreddit so no /r/ required
+            $this->subreddit = 'http://api.reddit.com/'.$this->_sub; 
+        }
         return $this->subreddit; 
     }
 
     function setWallpaper($paper) { 
         $paper = escapeshellcmd($paper);
         $cmd = str_replace("::FILE::", $paper, SET_BG_COMMAND ); 
-        //echo "cmd: $cmd \n"; 
         exec($cmd);
     }
 
@@ -175,13 +179,11 @@ class redditWallpaper {
                     $width = $image_size[0];
                     $height = $image_size[1];
 
-                    //echo "WIDTH:$width HEIGHT:$height"; 
                     if($width < $this->minWidth){ 
                                 return false; 
                     }
                     unset($type);
                     if(file_exists($filename)){ 
-                        //echo "I chose $filename  at $url \n"; 
                         return $filename; 
                     }
                 }else{
