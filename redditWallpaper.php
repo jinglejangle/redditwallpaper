@@ -5,7 +5,7 @@ define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
 $redditWallpaper = new redditWallpaper(); 
 
 class redditWallpaper { 
-    public $subreddit = 'http://www.reddit.com/r/wallpaper'; 
+    public $subreddit = 'http://www.reddit.com/user/kjoneslol/m/sfwpornnetwork';  //helpful user collates all swfporn subreddits
     private $images = [];
     private $saveto = '/tmp';
     private $fallback_image = '';
@@ -13,6 +13,7 @@ class redditWallpaper {
     private $_sub = null; 
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
+    public $excludeSubreddits = array('comicbookporn', 'foodporn', 'warporn', 'militaryporn');  //ignore these ones, other peoples lunch, and too raunchy for work. 
 
     function __construct($subreddits=array() ){ 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
@@ -85,8 +86,11 @@ class redditWallpaper {
                 if(isset($post->children)){ 
                     if(count($post->children)){ 
                         foreach($post->children as $child){ 
-                            if($child->data->domain == 'i.imgur.com'){ 
+                            if(in_array($child->data->domain , array('i.imgur.com', 'imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
                                 $images[] = $child->data->url; 
+                            }elseif (preg_match("/.jpg$/", $child->data->url)){ 
+                                //echo "ADDED IMAGE ".$child->data->url^."\n"; 
+                                $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
                             }
                         } 
                     }
@@ -194,6 +198,7 @@ class redditWallpaper {
         }
     }
 
+    //todo break out into another class. 
     private function decideSetMethod(){ 
 
         $uname = `uname -a`; 
