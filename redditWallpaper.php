@@ -1,4 +1,6 @@
 <?php
+namespace rubbishninja\redditwallpaper; 
+
 $home = getenv("HOME");
 define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
 
@@ -10,6 +12,7 @@ class redditWallpaper {
     private $saveto = '/tmp';
     private $fallback_image = '';
     private $subredditsConfigFile = 'subreddits.txt';
+    public $subreddits = array("wallpapers", "spaceporn", "waterporn", "skyporn", "earthporn");  //default 
     private $_sub = null; 
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
@@ -32,9 +35,11 @@ class redditWallpaper {
     }
 
     private function loadSubRedditsConfig(){ 
-        $f = trim(file_get_contents(dirname(__FILE__)."/".$this->subredditsConfigFile)); 
-        $subreddits = explode("\n", $f); 
-        $this->subreddits = $subreddits; 
+        if(file_exists(dirname(__FILE__)."/".$this->subredditsConfigFile)) {
+            $f = trim(file_get_contents(dirname(__FILE__)."/".$this->subredditsConfigFile)); 
+            $subreddits = explode("\n", $f); 
+            $this->subreddits = $subreddits; 
+        }
     }
 
     private function setupFolder(){ 
