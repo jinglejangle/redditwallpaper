@@ -2,6 +2,9 @@ redditWallpaper.php -
 sets all desktop screens to images it scrapes from reddit 
 
 if you want the full list of subreddits, copy subreddits.txt.dist to subreddits.txt 
+change edit subreddits.txt with the list of subreddits you want 
+delete it to go with the defauts. 
+
 
 Just run it using php: eg: 
 
