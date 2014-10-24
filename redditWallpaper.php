@@ -7,7 +7,7 @@ define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
 $subreddits = array();
 if(isset($argv[1])){ 
     if($argv[1] != 'keep'){ 
-        $subreddits = array(explode(",", $argv[1]));
+        $subreddits = explode(",", $argv[1]);
     }
     else { 
         redditWallpaper::keepCurrent(); 
@@ -73,6 +73,7 @@ class redditWallpaper {
     }
 
     function setWallpaper($paper) { 
+        echo "SETTING $paper\n";
         $paper = escapeshellcmd($paper);
         $cmd = str_replace("::FILE::", $paper, SET_BG_COMMAND ); 
         exec($cmd);
@@ -102,7 +103,7 @@ class redditWallpaper {
                 if(isset($post->children)){ 
                     if(count($post->children)){ 
                         foreach($post->children as $child){ 
-                            if(in_array($child->data->domain , array('i.imgur.com', 'imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
+                            if(in_array($child->data->domain , array('i.imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
                                 $images[] = $child->data->url; 
                             }elseif (preg_match("/.jpg$/", $child->data->url)){ 
                                 //echo "ADDED IMAGE ".$child->data->url^."\n"; 
