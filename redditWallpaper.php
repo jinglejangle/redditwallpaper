@@ -4,7 +4,18 @@ namespace rubbishninja\redditwallpaper;
 $home = getenv("HOME");
 define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
 
-$redditWallpaper = new redditWallpaper(); 
+$subreddits = array();
+if(isset($argv[1])){ 
+    if($argv[1] != 'keep'){ 
+        $subreddits = array(explode(",", $argv[1]));
+    }
+    else { 
+        redditWallpaper::keepCurrent(); 
+        die();        
+    }
+}
+
+$redditWallpaper = new redditWallpaper($subreddits); 
 
 class redditWallpaper { 
     public $subreddit = 'http://www.reddit.com/user/kjoneslol/m/sfwpornnetwork';  //helpful user collates all swfporn subreddits
@@ -240,6 +251,17 @@ class redditWallpaper {
         for($x=count($files)-1;$x>5; $x--){ 
             unlink($this->imgDir."/".$files[$x]); 
         }
+    }
+
+
+    //work out the latest image and keep it 
+    static function keepCurrent(){ 
+        $imgDir = AUTO_PICTURE_DIR; 
+        $cmd = "ls -t $imgDir/ | grep -v keep | head -1"; 
+        $file = trim(`$cmd`); 
+        $newFile = $imgDir."/keep_".time().$file; 
+        copy($imgDir."/".$file, $newFile); 
+        echo("File:$file was saved as as $newFile ");
     }
 }
 
