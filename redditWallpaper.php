@@ -13,7 +13,7 @@ class redditWallpaper {
     private $_sub = null; 
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
-    public $excludeSubreddits = array('comicbookporn', 'foodporn', 'warporn', 'militaryporn');  //ignore these ones, other peoples lunch, and too raunchy for work. 
+    public $excludeSubreddits = array('comicbookporn', 'foodporn', 'warporn', 'militaryporn', 'quotesporn');  //ignore these ones, other peoples lunch, and too raunchy for work, whatever. 
 
     function __construct($subreddits=array() ){ 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
@@ -97,7 +97,7 @@ class redditWallpaper {
                 }
             }
         }else{
-                die("Error. could not get json from api"); 
+                die("Error. could not get json from api. Reddit down?"); 
         }
         $this->images = $images; 
         return $this->images; 
