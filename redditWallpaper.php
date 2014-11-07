@@ -208,7 +208,7 @@ class redditWallpaper {
 
         $uname = `uname -a`; 
         if(preg_match("/darwin/i", $uname)){ 
-            //osx mavericks...
+            //osx...
             define( "SET_BG_COMMAND", 'osascript -e "tell application \"System Events\" to set picture of every desktop to \"::FILE::\""'); 
             return true; 
         } 
