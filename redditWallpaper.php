@@ -3,6 +3,7 @@ namespace rubbishninja\redditwallpaper;
 
 $home = getenv("HOME");
 define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
+$multipleMonitors = true; 
 
 $subreddits = array();
 if(isset($argv[1])){ 
@@ -14,10 +15,11 @@ if(isset($argv[1])){
         die();        
     }
 }
-
-$redditWallpaper = new redditWallpaper($subreddits); 
+$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
 
 class redditWallpaper { 
+
+    public $multipleMonitors=false; 
     public $subreddit = 'http://www.reddit.com/user/kjoneslol/m/sfwpornnetwork';  //helpful user collates all swfporn subreddits
     private $images = [];
     private $saveto = '/tmp';
@@ -29,20 +31,26 @@ class redditWallpaper {
     public $maxSizeLimit = 190792;  //about 190MB max
     public $excludeSubreddits = array('comicbookporn', 'foodporn', 'warporn', 'militaryporn', 'quotesporn');  //ignore these ones, other peoples lunch, and too raunchy for work, whatever. 
 
-    function __construct($subreddits=array() ){ 
+    function __construct($subreddits=array() , $multipleMonitors=false){ 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
         $this->setupFolder(); 
         $this->decideSetMethod(); 
         $this->checkDownloadFolderSize();
+        $this->multipleMonitors = $multipleMonitors; 
         if(!empty($subreddits)){ 
                 $this->subreddits = $subreddits; 
         }else{
                 $this->loadSubRedditsConfig();
         }
         $this->selectSubReddit($this->subreddits); 
-
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
+        if($this->multipleMonitors){
+            //$this->selectSubReddit($this->subreddits); 
+            $image2 = $this->fetchWallpaper();       
+            $this->setWallpaper($image, $image2);
+
+        }
     }
 
     private function loadSubRedditsConfig(){ 
@@ -72,11 +80,15 @@ class redditWallpaper {
         return $this->subreddit; 
     }
 
-    function setWallpaper($paper) { 
-        //echo "SETTING $paper\n";
+    function setWallpaper($paper, $paper2=null) { 
         $paper = escapeshellcmd($paper);
-        $cmd = str_replace("::FILE::", $paper, SET_BG_COMMAND ); 
-        exec($cmd);
+        $replace="::FILE::";
+        $cmd = str_replace($replace, $paper, SET_BG_COMMAND ); 
+        if(!is_null($paper2)){
+            $replace="::FILE2::";
+            $cmd = str_replace($replace, $paper2, $cmd ); 
+            exec($cmd);
+        }
     }
 
     function getJson(){ 
@@ -228,7 +240,17 @@ class redditWallpaper {
         $ps = `ps -ef`; 
         //xfce4 linux...
         if(preg_match("/xfce4/", $ps)){ 
-            define( "SET_BG_COMMAND", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s ::FILE::"); 
+            if(!$this->multipleMonitors){
+                //define( "SET_BG_COMMAND", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s ::FILE::"); 
+                define( "SET_BG_COMMAND", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s ::FILE:: && xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor1/image-path -n -t string -s ::FILE2:: "); 
+            }else{
+                //multiple monitor
+                define( "SET_BG_COMMAND", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s ::FILE:: && xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor1/image-path -n -t string -s ::FILE2:: "); 
+            }
+            return true; 
+        }
+        if(preg_match("/gnome-shell/", $ps)){ 
+            define( "SET_BG_COMMAND", "gsettings set org.gnome.desktop.background picture-uri  ::FILE:: "); 
             return true; 
         }
 
@@ -258,7 +280,7 @@ class redditWallpaper {
     //work out the latest image and keep it 
     static function keepCurrent(){ 
         $imgDir = AUTO_PICTURE_DIR; 
-        $cmd = "ls -t $imgDir/ | grep -v keep | head -1"; 
+        $cmd = "ls -t $imgDir/ | grep -v keep | tail -1"; 
         $file = trim(`$cmd`); 
         $newFile = $imgDir."/keep_".time().$file; 
         copy($imgDir."/".$file, $newFile); 
