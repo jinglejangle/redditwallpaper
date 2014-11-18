@@ -69,7 +69,7 @@ class redditWallpaper {
 
     function selectSubReddit($subreddits){ 
         shuffle($subreddits);
-        $extra = array("hot", "new", "gilded", "" ); 
+        $extra = array("hot", "new",  "" ); 
         $variant = $extra[rand(0,count($extra)-1)]; 
         $this->_sub = strtolower($subreddits[rand(0,count($subreddits)-1)])."/$variant";
         $this->subreddit = 'http://api.reddit.com/r/'.$this->_sub; 
@@ -77,7 +77,7 @@ class redditWallpaper {
             //this is a users subreddit so no /r/ required
             $this->subreddit = 'http://api.reddit.com/'.$this->_sub; 
         }
-		echo "$this->subreddit\n"; 
+		//echo "$this->subreddit\n"; 
         return $this->subreddit; 
     }
 
@@ -115,16 +115,19 @@ class redditWallpaper {
             foreach($json as $post){ 
                 if(isset($post->children)){ 
                     if(count($post->children)){ 
-                        foreach($post->children as $child){ 
+                        foreach($post->children as $child){
                             if(in_array($child->data->domain , array('i.imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
                                 $images[] = $child->data->url; 
-                            }elseif (preg_match("/.jpg$/", $child->data->url)){ 
-                                //echo "ADDED IMAGE ".$child->data->url."\n"; 
-                                $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
-                            }elseif (preg_match("/.png/i", $child->data->url)){ 
-                                //echo "ADDED IMAGE ".$child->data->url."\n"; 
-                                $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
                             }
+							if(isset($child->data->url)){	
+								if (preg_match("/.jpg$/", $child->data->url)){ 
+									//echo "ADDED IMAGE ".$child->data->url."\n"; 
+									$images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
+								}elseif (preg_match("/.png/i", $child->data->url)){ 
+									//echo "ADDED IMAGE ".$child->data->url."\n"; 
+									$images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
+								}
+							}
 
                         } 
                     }
