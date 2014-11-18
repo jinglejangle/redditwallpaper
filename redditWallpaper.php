@@ -65,12 +65,20 @@ class redditWallpaper {
         if(!file_exists(AUTO_PICTURE_DIR)){ 
             mkdir(AUTO_PICTURE_DIR);
         }
-    }
+	}
+
+	private function make_seed()
+	{
+		list($usec, $sec) = explode(' ', microtime());
+		return (float) $sec + ((float) $usec * 100000);
+	}
 
     function selectSubReddit($subreddits){ 
         shuffle($subreddits);
         $extra = array("hot", "new",  "" ); 
+		srand($this->make_seed());
         $variant = $extra[rand(0,count($extra)-1)]; 
+		srand($this->make_seed());
         $this->_sub = strtolower($subreddits[rand(0,count($subreddits)-1)])."/$variant";
         $this->subreddit = 'http://api.reddit.com/r/'.$this->_sub; 
         if(preg_match("/^user\//", $this->_sub)){ 
