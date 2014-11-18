@@ -146,7 +146,13 @@ class redditWallpaper {
                                 }elseif (preg_match("/.png/i", $child->data->url)){ 
                                     //echo "ADDED IMAGE ".$child->data->url."\n"; 
                                     $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
-                                }
+                                }else{
+									if(preg_match("/imgur.com\/[^a\/][a-zA-Z0-9]+/", $child->data->url)){ 
+                                    	$images[] = $child->data->url.".jpg";  
+									}else{
+										//echo "SKIPPING ".print_r($child->data->url,1)."\n";
+									}
+								}
                             }
 
                         } 
@@ -194,7 +200,6 @@ class redditWallpaper {
         shuffle($images);
         foreach($images as $url){ 
             $filename = basename($url); 
-
             if($this->checkAlreadySeen($filename)){ 
                 $this->fallback_image =  AUTO_PICTURE_DIR."/".$filename; 
                 return AUTO_PICTURE_DIR."/".$filename;
@@ -202,6 +207,7 @@ class redditWallpaper {
 
             $ch = curl_init ($url);
             curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
             $raw=curl_exec($ch);
@@ -213,6 +219,11 @@ class redditWallpaper {
             foreach($lines as $line){ 
                 if(preg_match("/^Content-Type: (.*)\/(.*)/", $line, $match)){ 
                     $type = ($match[2]);
+                }
+				if(preg_match("/^Location: (.*)\/(.*)/", $line, $match)){ 
+                    $image_url = $match[1]."/".$match[2];
+					$this->images = array($image_url); 
+					$this->fetchImage[$this->images]; 
                 }
             }
 
