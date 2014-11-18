@@ -25,7 +25,7 @@ class redditWallpaper {
     private $saveto = '/tmp';
     private $fallback_image = '';
     private $subredditsConfigFile = 'subreddits.txt';
-    public $subreddits = array("wallpapers", "spaceporn", "waterporn", "skyporn", "earthporn");  //default 
+    public $subreddits = array("wallpapers", "spaceporn", "waterporn", "skyporn", "earthporn", "fractalporn");  //default 
     private $_sub = null; 
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
@@ -33,10 +33,10 @@ class redditWallpaper {
 
     function __construct($subreddits=array() , $multipleMonitors=false){ 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
+        $this->multipleMonitors = $multipleMonitors; 
         $this->setupFolder(); 
         $this->decideSetMethod(); 
         $this->checkDownloadFolderSize();
-        $this->multipleMonitors = $multipleMonitors; 
         if(!empty($subreddits)){ 
                 $this->subreddits = $subreddits; 
         }else{
@@ -46,8 +46,8 @@ class redditWallpaper {
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
         if($this->multipleMonitors){
-            //$this->selectSubReddit($this->subreddits); 
             $image2 = $this->fetchWallpaper();       
+			//echo "IMAGE1: $image   IMAGE2: $image2 \n";
             $this->setWallpaper($image, $image2);
 
         }
@@ -96,6 +96,7 @@ class redditWallpaper {
         if(!is_null($paper2)){
             $replace="::FILE2::";
             $cmd = str_replace($replace, $paper2, $cmd ); 
+			//echo $cmd; 
             exec($cmd);
         }
     }
@@ -248,9 +249,14 @@ class redditWallpaper {
     private function decideSetMethod(){ 
 
         $uname = `uname -a`; 
+
+         //osx...
         if(preg_match("/darwin/i", $uname)){ 
-            //osx...
-            define( "SET_BG_COMMAND", 'osascript -e "tell application \"System Events\" to set picture of every desktop to \"::FILE::\""'); 
+			if(!$this->multipleMonitors){
+				define( "SET_BG_COMMAND", 'osascript -e "tell application \"System Events\" to set picture of every desktop to \"::FILE::\""'); 
+			}else{
+				define( "SET_BG_COMMAND", 'osascript -e "tell application \"System Events\" to set picture of desktop 1 to \"::FILE::\"" && osascript -e "tell application \"System Events\" to set picture of desktop 2 to \"::FILE2::\"" '); 
+			}
             return true; 
         } 
 
