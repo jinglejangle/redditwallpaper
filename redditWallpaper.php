@@ -324,25 +324,28 @@ class redditWallpaper {
 
 class multiwall extends redditwallpaper { 
 	public $leftRight = true; 
-	function __construct(){ 
-		$this->subreddits = ['multiwall']; 
-		parent::__construct($this->subreddits, true); 	
+	function __construct($subreddits, $multi){ 
+			$this->subreddits = $subreddits;
+			$this->multi = $multi; 
 	}
 
 	function checkImageMagick(){ 
-		return `which convert`; 
+		return file_exists("/usr/local/bin/convert"); 
 	}
 
 	function doSetWallpapers(){ 
 		if(!$this->checkImageMagick()){ 
-			//echo "Imagemagick not installed. Using multiple single images."; 
+			echo "Imagemagick not installed. Using multiple single images."; 
+			parent::__construct($this->subreddits, $this->multi); 	
 			parent::doSetWallpapers(); 
 			return true; 
 		}
+		$this->subreddits = ['multiwall']; 
+		parent::__construct($this->subreddits, true); 	
 
 		$image= $this->fetchWallpaper();       
 		$image = addslashes($image);
-		$cmd = "convert $image -crop 50%x100% +repage ".$image."_horizontal_%d.jpg"; 
+		$cmd = "/usr/local/bin/convert $image -crop 50%x100% +repage ".$image."_horizontal_%d.jpg"; 
 		system($cmd);
 
 		$image1 = $image."_horizontal_0.jpg"; 
