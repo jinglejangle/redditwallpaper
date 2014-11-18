@@ -116,18 +116,19 @@ class redditWallpaper {
                 if(isset($post->children)){ 
                     if(count($post->children)){ 
                         foreach($post->children as $child){
-                            if(in_array($child->data->domain , array('i.imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
-                                $images[] = $child->data->url; 
+                            if(isset($child->data->url)){	
+                                if(in_array($child->data->domain , array('i.imgur.com')) && !in_array($child->data->subreddit, $this->excludeSubreddits )){ 
+                                    $images[] = $child->data->url; 
+                                    //echo "ADDED IMAGE ".$child->data->url."\n"; 
+                                }
+                                elseif (preg_match("/.jpg$/", $child->data->url)){ 
+                                    //echo "ADDED IMAGE ".$child->data->url."\n"; 
+                                    $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
+                                }elseif (preg_match("/.png/i", $child->data->url)){ 
+                                    //echo "ADDED IMAGE ".$child->data->url."\n"; 
+                                    $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
+                                }
                             }
-							if(isset($child->data->url)){	
-								if (preg_match("/.jpg$/", $child->data->url)){ 
-									//echo "ADDED IMAGE ".$child->data->url."\n"; 
-									$images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
-								}elseif (preg_match("/.png/i", $child->data->url)){ 
-									//echo "ADDED IMAGE ".$child->data->url."\n"; 
-									$images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
-								}
-							}
 
                         } 
                     }
