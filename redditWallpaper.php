@@ -15,7 +15,14 @@ if(isset($argv[1])){
         die();        
     }
 }
-$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
+
+#$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
+#$redditWallpaper->doSetWallpapers(); 
+
+$redditWallpaper = new multiwall($subreddits, $multipleMonitors); 
+$redditWallpaper->leftRight=false; 
+$redditWallpaper->doSetWallpapers(); 
+
 
 class redditWallpaper { 
 
@@ -30,6 +37,7 @@ class redditWallpaper {
     public $minWidth = 1440; //minimum X resolution
     public $maxSizeLimit = 190792;  //about 190MB max
     public $excludeSubreddits = array('comicbookporn', 'foodporn', 'warporn', 'militaryporn', 'quotesporn');  //ignore these ones, other peoples lunch, and too raunchy for work, whatever. 
+    public $leftRight = false; 
 
     function __construct($subreddits=array() , $multipleMonitors=false){ 
         $this->saveto = AUTO_PICTURE_DIR."/wallpaper."; 
@@ -43,16 +51,18 @@ class redditWallpaper {
                 $this->loadSubRedditsConfig();
         }
         $this->selectSubReddit($this->subreddits); 
+    }
+
+
+	public function doSetWallpapers(){ 
         $image = $this->fetchWallpaper();       
         $this->setWallpaper($image);
         if($this->multipleMonitors){
             $image2 = $this->fetchWallpaper();       
-			//echo "IMAGE1: $image   IMAGE2: $image2 \n";
             $this->setWallpaper($image, $image2);
 
         }
-    }
-
+	}
     private function loadSubRedditsConfig(){ 
         if(file_exists(dirname(__FILE__)."/".$this->subredditsConfigFile)) {
             $f = trim(file_get_contents(dirname(__FILE__)."/".$this->subredditsConfigFile)); 
@@ -312,6 +322,39 @@ class redditWallpaper {
 }
 
 
+class multiwall extends redditwallpaper { 
+	public $leftRight = true; 
+	function __construct(){ 
+		$this->subreddits = ['multiwall']; 
+		parent::__construct($this->subreddits, true); 	
+	}
+
+	function checkImageMagick(){ 
+		return `which convert`; 
+	}
+
+	function doSetWallpapers(){ 
+		if(!$this->checkImageMagick()){ 
+			//echo "Imagemagick not installed. Using multiple single images."; 
+			parent::doSetWallpapers(); 
+			return true; 
+		}
+
+		$image= $this->fetchWallpaper();       
+		$image = addslashes($image);
+		$cmd = "convert $image -crop 50%x100% +repage ".$image."_horizontal_%d.jpg"; 
+		system($cmd);
+
+		$image1 = $image."_horizontal_0.jpg"; 
+		$image2 = $image."_horizontal_1.jpg"; 
+
+		if($this->leftRight){ 
+        	$this->setWallpaper($image1, $image2);
+		}else{
+        	$this->setWallpaper($image2, $image1);
+		}
+	}
+}
 
 
 
