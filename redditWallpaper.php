@@ -1,10 +1,13 @@
 <?php
 namespace rubbishninja\redditwallpaper; 
 
+$multipleMonitors = true; 
+$multiwall = true; 
+
+
+
 $home = getenv("HOME");
 define( "AUTO_PICTURE_DIR", $home."/redditautowallpaper");
-$multipleMonitors = true; 
-
 $subreddits = array();
 if(isset($argv[1])){ 
     if($argv[1] != 'keep'){ 
@@ -16,12 +19,20 @@ if(isset($argv[1])){
     }
 }
 
-#$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
-#$redditWallpaper->doSetWallpapers(); 
+if(!$multipleMonitors){ 
+	$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
+	$redditWallpaper->doSetWallpapers(); 
+}else{
 
-$redditWallpaper = new multiwall($subreddits, $multipleMonitors); 
-$redditWallpaper->leftRight=false; 
-$redditWallpaper->doSetWallpapers(); 
+	if(!$multiwall){ 
+		$redditWallpaper = new redditWallpaper($subreddits, $multipleMonitors); 
+		$redditWallpaper->doSetWallpapers(); 
+	}else{
+		$redditWallpaper = new multiwall($subreddits, $multipleMonitors); 
+		$redditWallpaper->leftRight=false; 
+		$redditWallpaper->doSetWallpapers(); 
+	}
+}
 
 
 class redditWallpaper { 
@@ -107,8 +118,9 @@ class redditWallpaper {
             $replace="::FILE2::";
             $cmd = str_replace($replace, $paper2, $cmd ); 
 			//echo $cmd; 
-            exec($cmd);
         }
+		//echo "RUNNING:$cmd\n";
+      	exec($cmd);
     }
 
     function getJson(){ 
@@ -222,8 +234,10 @@ class redditWallpaper {
                 }
 				if(preg_match("/^Location: (.*)\/(.*)/", $line, $match)){ 
                     $image_url = $match[1]."/".$match[2];
-					$this->images = array($image_url); 
-					$this->fetchImage[$this->images]; 
+					if(!empty($image_url)){ 
+						$this->images = array($image_url); 
+						$this->fetchImage[$this->images]; 
+					}
                 }
             }
 
