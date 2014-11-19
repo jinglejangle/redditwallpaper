@@ -157,10 +157,15 @@ class redditWallpaper {
                                     $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
                                 }elseif (preg_match("/.png/i", $child->data->url)){ 
                                     //echo "ADDED IMAGE ".$child->data->url."\n"; 
-                                    $images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
-                                }else{
+									$images[] = $child->data->url;  //not imgur link but is a direct link to a jpg so we'll add it... 
+								}elseif (preg_match("/imgur.com\/a\//", $child->data->url)){
+									//echo "IMGUR/A DETECTED  IMAGE ".$child->data->url."\n";
+									$found_images = $this->imgurDewrangler($child->data->url);
+									$images = array_merge($images, $found_images);
+
+								}else{
 									if(preg_match("/imgur.com\/[^a\/][a-zA-Z0-9]+/", $child->data->url)){ 
-                                    	$images[] = $child->data->url.".jpg";  
+										$images[] = $child->data->url.".jpg";  
 									}else{
 										//echo "SKIPPING ".print_r($child->data->url,1)."\n";
 									}
@@ -177,6 +182,20 @@ class redditWallpaper {
         $this->images = $images; 
         return $this->images; 
     }
+
+	//takes an /a/ imgur link and searches it for the images it contains 
+	private function imgurDewrangler($url){ 
+		$html = file_get_contents($url); 
+
+		$aImages=[]; 
+		if(preg_match_all("/\/\/i.imgur.com\/[a-z0-9]+.jpg/i", $html, $matches)){ 
+			foreach($matches[0] as $m){ 
+				$aImages[basename($m)] = 'http:'.$m; 
+			}
+			$aImages = array_values($aImages);
+		}
+		return $aImages; 
+	}
 
     function fetchWallpaper(){ 
         $this->images = $this->getImages(); 
