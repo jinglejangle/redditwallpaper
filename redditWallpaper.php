@@ -123,7 +123,7 @@ class redditWallpaper {
       	exec($cmd);
     }
 
-    function getJson(){ 
+    function getJson($loadAfter=4){ 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -132,6 +132,17 @@ class redditWallpaper {
         $json=curl_exec($ch);
         curl_close($ch);
         $obj = json_decode($json);
+		//print_r($obj);
+		$after = $obj->data->after;
+
+		//getmore...
+		if($loadAfter){
+			$this->subreddit .= "?after=$after"; 
+			$obj2 = $this->getJson(--$loadAfter);
+			foreach($obj2->data->children as $child){ 
+				$obj->data->children[] = $child; 
+			}
+		}
         $this->data = $obj; 
         return $obj;
     }
