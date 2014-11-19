@@ -181,20 +181,19 @@ class redditWallpaper {
         }
         $this->images = $images; 
         return $this->images; 
-    }
+	}
 
-	//takes an /a/ imgur link and searches it for the images it contains 
-	private function imgurDewrangler($url){ 
-		$html = file_get_contents($url); 
+	private function imgurDewrangler($url){
+		$html = file_get_contents($url);
 
-		$aImages=[]; 
-		if(preg_match_all("/\/\/i.imgur.com\/[a-z0-9]+.jpg/i", $html, $matches)){ 
-			foreach($matches[0] as $m){ 
-				$aImages[basename($m)] = 'http:'.$m; 
+		$aImages=[];
+		if(preg_match_all("/\/\/i.imgur.com\/[a-z0-9]+[^s].jpg/i", $html, $matches)){
+			foreach($matches[0] as $m){
+				$aImages[basename($m)] = 'http:'.$m;
 			}
 			$aImages = array_values($aImages);
 		}
-		return $aImages; 
+		return $aImages;
 	}
 
     function fetchWallpaper(){ 
